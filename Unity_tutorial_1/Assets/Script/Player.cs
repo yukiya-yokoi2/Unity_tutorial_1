@@ -6,10 +6,12 @@ public class Player : MonoBehaviour
 {
     //インスペクターで設定する
     public float speed;
+    public GroundCheck ground;
 
     //プライベート設定
     private Animator anim = null;
     private Rigidbody2D rb = null;
+    private bool isGround = false;
 
     // Start is called before the first frame update
     void Start()
@@ -21,8 +23,11 @@ public class Player : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
+        //設置判定を得る
+        isGround = ground.IsGround();
+
         //キー入力されたら行動する
         float horizontalKey = Input.GetAxis("Horizontal");
         float xSpeed = 0.0f;
