@@ -1890,6 +1890,7 @@ MonoBehaviour:
   jumpSpeed: 10
   jumpHeight: 3
   jumpLimitTime: 1
+  stepOnRate: 10
   gravity: 4
   ground: {fileID: 2002743621}
   head: {fileID: 229629572}
@@ -2499,7 +2500,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80042279c584ec84cb3b315265a1da72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boundHeight: 2
+  boundHeight: 4
   playerStepOn: 0
 --- !u!1 &1963936913
 GameObject:

@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
     [Header("ジャンプ速度")] public float jumpSpeed;
     [Header("ジャンプ高さ")] public float jumpHeight;
     [Header("ジャンプ制限時間")] public float jumpLimitTime;
+    [Header("踏みつけ判定の高さの割合")] public float stepOnRate;
     [Header("重力")] public float gravity;
     [Header("接地判定")] public GroundCheck ground;
     [Header("頭ぶつけた判定")] public GroundCheck head;
@@ -19,13 +20,16 @@ public class Player : MonoBehaviour
     #region//プライベート設定
     private Animator anim = null;
     private Rigidbody2D rb = null;
+    private CapsuleCollider2D capcol = null;
     private bool isGround = false;
     private bool isJump = false;
+    private bool isOtherJump = false;
     private bool isHead = false;
     private bool isRun = false;
     private bool isDown = false;
     private float jumpPos = 0.0f;
     private float jumpTime = 0.0f;
+    private float otherJumpHeight = 0.0f;
     private float dashTime = 0.0f;
     private float beforeKey;
     private string enemyTag = "Enemy";
@@ -37,6 +41,7 @@ public class Player : MonoBehaviour
         //コンポーネントのインスタンスを捕まえる
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
+        capcol = GetComponent<CapsuleCollider2D>();
     }
 
     // Update is called once per frame
@@ -74,7 +79,27 @@ public class Player : MonoBehaviour
     {
         float verticalKey = Input.GetAxis("Vertical");
         float ySpeed = -gravity;
-        if (isGround)
+
+        if (isOtherJump)
+        {
+            //現在の高さが飛べる高さより下か
+            bool canHeight = jumpPos + otherJumpHeight > transform.position.y;
+            //ジャンプ時間が長くなりすぎてないか
+            bool canTime = jumpLimitTime > jumpTime;
+
+            if (canHeight && canTime && !isHead)
+            {
+                ySpeed = jumpSpeed;
+                jumpTime += Time.deltaTime;
+            }
+            else
+            {
+                isOtherJump = false;
+                jumpTime = 0.0f;
+            }
+        }
+
+        else if (isGround)
         {
             if (verticalKey > 0)
             {
@@ -108,7 +133,7 @@ public class Player : MonoBehaviour
                 jumpTime = 0.0f;
             }
         }
-        if (isJump)
+        if (isJump||isOtherJump)
         {
             ySpeed *= jumpCurve.Evaluate(jumpTime);
         }
@@ -164,7 +189,7 @@ public class Player : MonoBehaviour
     /// </summary>
     private void SetAnimation()
     {
-        anim.SetBool("jump", isJump);
+        anim.SetBool("jump", isJump||isOtherJump);
         anim.SetBool("ground", isGround);
         anim.SetBool("run", isRun);
     }
@@ -174,8 +199,41 @@ public class Player : MonoBehaviour
     {
         if (collision.collider.tag == enemyTag)
         {
-            anim.Play("player_down");
-            isDown = true;
+            //踏みつけ判定になる高さ
+            float stepOnHeight = (capcol.size.y * (stepOnRate / 100f));
+
+            //踏みつけ判定のワールド座標
+            float judgePos = transform.position.y - (capcol.size.y / 2f) + stepOnHeight;
+
+            foreach (ContactPoint2D p in collision.contacts)
+            {
+                if (p.point.y < judgePos)
+                {
+                    //もう一度跳ねる
+                    ObjectCollision o = collision.gameObject.GetComponent<ObjectCollision>();
+                    if (o != null)
+                    {
+                        otherJumpHeight = o.boundHeight;    //踏んづけたものから跳ねる高さを取得する
+                        o.playerStepOn = true;        //踏んづけたものに対して踏んづけた事を通知する
+                        jumpPos = transform.position.y; //ジャンプした位置を記録する
+                        isOtherJump = true;
+                        isJump = false;
+                        jumpTime = 0.0f;
+                    }
+                    else
+                    {
+                        Debug.Log("ObjectCollisionが付いてないよ!");
+                    }
+                }
+                else
+                {
+                    //ダウンする
+                    anim.Play("player_down");
+                    isDown = true;
+                    break;
+                }
+            }
+
         }
     }
     #endregion
