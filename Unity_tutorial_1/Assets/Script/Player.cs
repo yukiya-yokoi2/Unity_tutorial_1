@@ -23,10 +23,12 @@ public class Player : MonoBehaviour
     private bool isJump = false;
     private bool isHead = false;
     private bool isRun = false;
+    private bool isDown = false;
     private float jumpPos = 0.0f;
     private float jumpTime = 0.0f;
     private float dashTime = 0.0f;
     private float beforeKey;
+    private string enemyTag = "Enemy";
     #endregion
 
     // Start is called before the first frame update
@@ -40,19 +42,28 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        //設置判定を得る
-        isGround = ground.IsGround();
-        isHead = head.IsGround();
 
-        //各種座標軸の速度を求める
-        float ySpeed = GetYSpeed();
-        float xSpeed = GetXSpeed();
+        if (!isDown)
+        {
+            //設置判定を得る
+            isGround = ground.IsGround();
+            isHead = head.IsGround();
 
-        //アニメーションを適用
-        SetAnimation();
+            //各種座標軸の速度を求める
+            float ySpeed = GetYSpeed();
+            float xSpeed = GetXSpeed();
 
-        //移動速度を設定
-        rb.velocity = new Vector2(xSpeed, ySpeed);
+            //アニメーションを適用
+            SetAnimation();
+
+            //移動速度を設定
+            rb.velocity = new Vector2(xSpeed, ySpeed);
+        }
+        else
+        {
+            rb.velocity = new Vector2(0, -gravity);
+        }
+        
     }
 
     /// <summary>
@@ -157,4 +168,15 @@ public class Player : MonoBehaviour
         anim.SetBool("ground", isGround);
         anim.SetBool("run", isRun);
     }
+
+    #region//接触判定
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.tag == enemyTag)
+        {
+            anim.Play("player_down");
+            isDown = true;
+        }
+    }
+    #endregion
 }
