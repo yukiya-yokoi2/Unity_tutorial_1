@@ -4,18 +4,18 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class Score : MonoBehaviour
+public class StageNum : MonoBehaviour
 {
-    private TextMeshProUGUI scoreText = null;
-    private int oldScore = 0;
+    private TextMeshProUGUI stageText = null;
+    private int oldStageNum = 0;
 
     // Start is called before the first frame update
     void Start()
     {
-        scoreText = GetComponent<TextMeshProUGUI>();
+        stageText = GetComponent<TextMeshProUGUI>();
         if (GManager.instance != null)
         {
-            scoreText.text = "Score " + GManager.instance.score;
+            stageText.text = "Stage " + GManager.instance.stageNum;
         }
         else
         {
@@ -27,10 +27,10 @@ public class Score : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (oldScore != GManager.instance.score)
+        if (oldStageNum != GManager.instance.stageNum)
         {
-            scoreText.text = "Score " + GManager.instance.score;
-            oldScore = GManager.instance.score;
+            stageText.text = "Stage " + GManager.instance.stageNum;
+            oldStageNum = GManager.instance.stageNum;
         }
     }
 }

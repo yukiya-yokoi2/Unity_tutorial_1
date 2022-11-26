@@ -4,18 +4,18 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class Score : MonoBehaviour
+public class Heart : MonoBehaviour
 {
-    private TextMeshProUGUI scoreText = null;
-    private int oldScore = 0;
+    private TextMeshProUGUI heartText = null;
+    private int oldHeartNum = 0;
 
     // Start is called before the first frame update
     void Start()
     {
-        scoreText = GetComponent<TextMeshProUGUI>();
+        heartText = GetComponent<TextMeshProUGUI>();
         if (GManager.instance != null)
         {
-            scoreText.text = "Score " + GManager.instance.score;
+            heartText.text = "Å~ " + GManager.instance.heartNum;
         }
         else
         {
@@ -27,10 +27,10 @@ public class Score : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (oldScore != GManager.instance.score)
+        if (oldHeartNum != GManager.instance.heartNum)
         {
-            scoreText.text = "Score " + GManager.instance.score;
-            oldScore = GManager.instance.score;
+            heartText.text = "Å~ " + GManager.instance.heartNum;
+            oldHeartNum = GManager.instance.heartNum;
         }
     }
 }

@@ -8,6 +8,7 @@ public class GManager : MonoBehaviour
     public static GManager instance = null;
     public int score;
     public int stageNum;
+    public int heartNum;
     public int continueNum;
 
     private void Awake()

@@ -5,6 +5,7 @@ using UnityEngine;
 public class Enemy1 : MonoBehaviour
 {
     #region//インスペクターで設定する
+    [Header("加算スコア")] public int myScore;
     [Header("画面外でも行動する")] public bool nonVisibleAct;
     [Header("重力")] public float gravity;
     [Header("移動速度")] public float speed;
@@ -66,8 +67,13 @@ public class Enemy1 : MonoBehaviour
         {
             if (!isDead)
             {
+                if (GManager.instance != null)
+                {
+
+                    GManager.instance.score += myScore;
+                }
+
                 anim.Play("enemy_down");
-                
                 isDead = true;
                 col.enabled = false;
                 Destroy(gameObject, 3f);
