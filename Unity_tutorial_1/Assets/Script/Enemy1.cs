@@ -10,7 +10,6 @@ public class Enemy1 : MonoBehaviour
     [Header("移動速度")] public float speed;
     [Header("やられて落ちる速度")] public float fallspeed;
     [Header("接触判定")] public EnemyCheck checkcollision;
-    [Header("接地判定")] public GroundCheck ground;
     #endregion
 
     #region//プライベート変数
