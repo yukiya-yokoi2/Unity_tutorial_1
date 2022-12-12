@@ -21,12 +21,16 @@ public class Player : MonoBehaviour
     private Animator anim = null;
     private Rigidbody2D rb = null;
     private CapsuleCollider2D capcol = null;
+    private SpriteRenderer sr = null;
     private bool isGround = false;
     private bool isJump = false;
     private bool isOtherJump = false;
     private bool isHead = false;
     private bool isRun = false;
     private bool isDown = false;
+    private bool isContinue = false;
+    private float continueTime = 0.0f;
+    private float blinkTime = 0.0f;
     private float jumpPos = 0.0f;
     private float jumpTime = 0.0f;
     private float otherJumpHeight = 0.0f;
@@ -42,6 +46,44 @@ public class Player : MonoBehaviour
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         capcol = GetComponent<CapsuleCollider2D>();
+        sr = GetComponent<SpriteRenderer>();
+    }
+
+    private void Update()
+    {
+        if (isContinue)
+        {
+            //明滅　ついている時に戻る
+            if (blinkTime > 0.2f)
+            {
+                sr.enabled = true;
+                blinkTime = 0.0f;
+            }
+            //明滅　消えている時
+            else if(blinkTime>0.1f)
+            {
+                sr.enabled = false;
+            }
+            //明滅　ついている時
+            else
+            {
+                sr.enabled = true;
+            }
+
+            //1秒経過したら明滅終了
+            if (continueTime > 1.0f)
+            {
+                isContinue = false;
+                blinkTime = 0.0f;
+                continueTime = 0.0f;
+                sr.enabled = true;
+            }
+            else
+            {
+                blinkTime += Time.deltaTime;
+                continueTime += Time.deltaTime;
+            }
+        }
     }
 
     // Update is called once per frame
@@ -192,6 +234,45 @@ public class Player : MonoBehaviour
         anim.SetBool("jump", isJump||isOtherJump);
         anim.SetBool("ground", isGround);
         anim.SetBool("run", isRun);
+    }
+
+    /// <summary>
+    /// コンティニュー待機状態か
+    /// </summary>
+    /// <returns></returns>
+    public bool IsContinueWaiting()
+    {
+        return IsDownAnimEnd();
+    }
+    //ダウンアニメーションが完了しているかどうか
+    private bool IsDownAnimEnd()
+    {
+        if (isDown && anim != null)
+        {
+            AnimatorStateInfo currentState = anim.GetCurrentAnimatorStateInfo(0);
+            if (currentState.IsName("player_down"))
+            {
+                if (currentState.normalizedTime >= 1)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// コンティニューする
+    /// </summary>
+    public void ContinuePlayer()
+    {
+        isDown = false;
+        anim.Play("player_stand");
+        isJump = false;
+        isOtherJump = false;
+        isRun = false;
+        isContinue = true;
+
     }
 
     #region//接触判定
