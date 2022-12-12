@@ -29,6 +29,7 @@ public class Player : MonoBehaviour
     private bool isRun = false;
     private bool isDown = false;
     private bool isContinue = false;
+    private bool nonDownAnim = false;
     private float continueTime = 0.0f;
     private float blinkTime = 0.0f;
     private float jumpPos = 0.0f;
@@ -37,6 +38,8 @@ public class Player : MonoBehaviour
     private float dashTime = 0.0f;
     private float beforeKey;
     private string enemyTag = "Enemy";
+    private string deadAreaTag = "DeadArea";
+    private string hitAreaTag = "HitArea";
     #endregion
 
     // Start is called before the first frame update
@@ -90,7 +93,7 @@ public class Player : MonoBehaviour
     void FixedUpdate()
     {
 
-        if (!isDown)
+        if (!isDown && !GManager.instance.isGameOver)
         {
             //設置判定を得る
             isGround = ground.IsGround();
@@ -242,7 +245,14 @@ public class Player : MonoBehaviour
     /// <returns></returns>
     public bool IsContinueWaiting()
     {
-        return IsDownAnimEnd();
+        if (GManager.instance.isGameOver)
+        {
+            return false;
+        }
+        else
+        {
+            return IsDownAnimEnd() || nonDownAnim;
+        }
     }
     //ダウンアニメーションが完了しているかどうか
     private bool IsDownAnimEnd()
@@ -272,7 +282,31 @@ public class Player : MonoBehaviour
         isOtherJump = false;
         isRun = false;
         isContinue = true;
+        nonDownAnim = false;
 
+    }
+
+    private void ReceiveDamege(bool downAnim)
+    {
+        if (isDown)
+        {
+            return;
+        }
+        else
+        {
+            if (downAnim)
+            {
+                anim.Play("player_down");
+            }
+            else
+            {
+                nonDownAnim = true;
+            }
+            //ダウンする
+            anim.Play("player_down");
+            isDown = true;
+            GManager.instance.SubHeartNum();
+        }
     }
 
     #region//接触判定
@@ -308,13 +342,22 @@ public class Player : MonoBehaviour
                 }
                 else
                 {
-                    //ダウンする
-                    anim.Play("player_down");
-                    isDown = true;
+                    ReceiveDamege(true);
                     break;
                 }
             }
+        }
+    }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.tag == deadAreaTag)
+        {
+            ReceiveDamege(false);
+        }
+        else if (collision.tag == hitAreaTag)
+        {
+            ReceiveDamege(true);
         }
     }
     #endregion
